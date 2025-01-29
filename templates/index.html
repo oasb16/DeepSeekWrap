@@ -12,7 +12,13 @@
         <header>
             <h1>DeepSeek Experience</h1>
             <p>Engage with AI-powered insights.</p>
+            {% if current_user.is_authenticated %}
+                <p>Welcome, {{ current_user.name }} | <a href="{{ url_for('logout') }}">Logout</a></p>
+            {% else %}
+                <a href="{{ url_for('login') }}" class="google-btn">Login with Google</a>
+            {% endif %}
         </header>
+        {% if current_user.is_authenticated %}
         <main>
             <div class="model-selection">
                 <label for="service">Choose a service:</label>
@@ -32,10 +38,15 @@
                 <button id="submit-btn">Submit</button>
             </div>
             <div id="response-section" class="hidden">
-                <h2>DeepSeek Response:</h2>
+                <h2>Response:</h2>
                 <p id="response-text"></p>
             </div>
+            <div id="chat-history" class="hidden">
+                <h2>Chat History:</h2>
+                <div id="history-content"></div>
+            </div>
         </main>
+        {% endif %}
         <footer>
             <p>&copy; 2025 DeepSeek Proxy Gateway</p>
         </footer>
@@ -66,6 +77,8 @@
 
         document.getElementById('submit-btn').addEventListener('click', async () => {
             const userInput = document.getElementById('user-input').value.trim();
+            const selectedService = serviceSelect.value;
+            const selectedModel = modelSelect.value;
             if (!userInput) return;
 
             const responseSection = document.getElementById('response-section');
@@ -77,17 +90,34 @@
                     headers: {
                         'Content-Type': 'application/json',
                     },
-                    body: JSON.stringify({ input: userInput }),
+                    body: JSON.stringify({ input: userInput, service: selectedService, model: selectedModel }),
                 });
 
                 const data = await response.json();
-                responseText.textContent = data; // Adjust based on DeepSeek's response structure
+                responseText.textContent = data.response; // Adjust based on your response structure
                 responseSection.classList.remove('hidden');
+                updateChatHistory(data.history);
             } catch (error) {
                 responseText.textContent = `Error: ${error.message}`;
                 responseSection.classList.remove('hidden');
             }
         });
+
+        function updateChatHistory(history) {
+            const historyContent = document.getElementById('history-content');
+            historyContent.innerHTML = '';
+            history.forEach(entry => {
+                const userDiv = document.createElement('div');
+                userDiv.classList.add('chat-entry', 'user-entry');
+                userDiv.textContent = entry.user_input;
+                const responseDiv = document.createElement('div');
+                responseDiv.classList.add('chat-entry', 'response-entry');
+                responseDiv.textContent = entry.response_data;
+                historyContent.appendChild(userDiv);
+                historyContent.appendChild(responseDiv);
+            });
+            document.getElementById('chat-history').classList.remove('hidden');
+        }
     </script>
 </body>
 </html>

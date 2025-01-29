@@ -2,7 +2,7 @@
 
 body {
     font-family: 'Roboto', sans-serif;
-    background-color: #f9f9f9;
+    background: linear-gradient(135deg, #f5f7fa, #c3cfe2);
     margin: 0;
     padding: 0;
     display: flex;
@@ -13,30 +13,64 @@ body {
 }
 
 .container {
-    background-color: #fff;
-    border-radius: 12px;
-    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+    background-color: #ffffff;
+    border-radius: 16px;
+    box-shadow: 0 8px 30px rgba(0, 0, 0, 0.1);
     width: 90%;
     max-width: 600px;
     text-align: center;
-    padding: 30px 20px;
-    transition: transform 0.3s ease;
+    padding: 40px 30px;
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
 }
 
 .container:hover {
     transform: translateY(-5px);
+    box-shadow: 0 12px 40px rgba(0, 0, 0, 0.15);
 }
 
 header h1 {
     font-size: 2.5em;
     margin-bottom: 0.2em;
     color: #007BFF;
+    font-weight: 500;
 }
 
 header p {
-    font-size: 1.2em;
+    font-size: 1.1em;
     margin-bottom: 1.5em;
     color: #555;
+}
+
+.google-btn {
+    background-color: #4285F4;
+    color: #fff;
+    padding: 10px 20px;
+    border-radius: 5px;
+    text-decoration: none;
+    font-weight: 500;
+    transition: background-color 0.3s;
+}
+
+.google-btn:hover {
+    background-color: #357AE8;
+}
+
+.model-selection {
+    margin-bottom: 1.5em;
+}
+
+.model-selection label {
+    display: block;
+    margin-top: 10px;
+    font-weight: 500;
+}
+
+.model-selection select {
+    width: 100%;
+    padding: 10px;
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    margin-top: 5px;
 }
 
 .input-section {
@@ -50,14 +84,14 @@ textarea {
     border-radius: 8px;
     padding: 15px;
     font-size: 1em;
-    transition: border-color 0.3s;
+    transition: border-color 0.3s, box-shadow 0.3s;
     resize: none;
 }
 
 textarea:focus {
     border-color: #007BFF;
     outline: none;
-    box-shadow: 0 0 5px rgba(0, 123, 255, 0.5);
+    box-shadow: 0 0 8px rgba(0, 123, 255, 0.3);
 }
 
 button {
@@ -98,6 +132,34 @@ button:active {
     border-radius: 8px;
     padding: 15px;
     white-space: pre-wrap;
+}
+
+#chat-history {
+    margin-top: 2em;
+    text-align: left;
+}
+
+#chat-history h2 {
+    font-size: 1.5em;
+    margin-bottom: 0.5em;
+    color: #007BFF;
+}
+
+.chat-message {
+    padding: 10px;
+    border-radius: 8px;
+    margin-bottom: 10px;
+    background-color: #e9f5ff;
+}
+
+.user-message {
+    background-color: #d1ecf1;
+    text-align: right;
+}
+
+.bot-message {
+    background-color: #f8d7da;
+    text-align: left;
 }
 
 footer {
