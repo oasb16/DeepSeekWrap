@@ -32,7 +32,7 @@ def query():
             stream=False
         )
         response_data=response.choices[0].message.content
-        print(response_data)
+        print("RESPONSE IS " + str(response_data))
         return jsonify(response_data)
     except Exception as e:
         return jsonify({'error': str(e)}), 500
