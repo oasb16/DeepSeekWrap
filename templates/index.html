@@ -96,7 +96,10 @@
                 });
 
                 const data = await response.json();
-                responseText.textContent = data.response; // Adjust based on your response structure
+                responseText.textContent = data.response;
+                console.log(data)
+                console.log(data.response) // Adjust based on your response structure
+                console.log(data.history)
                 responseSection.classList.remove('hidden');
                 updateChatHistory(data.history);
             } catch (error) {
