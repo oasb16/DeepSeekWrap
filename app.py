@@ -134,9 +134,22 @@ def query():
         ]
         message=[{"role": "system", "content": "You are a helpful assistant"},{"role": "user", "content": user_input}]
 
+        # To send a client event, serialize a dictionary to JSON
+        # of the proper event type
         def on_open(ws):
             print("Connected to server.")
+            
+            event = {
+                "type": "response.create",
+                "response": {
+                    "modalities": ["text"],
+                    "instructions": "Please assist the user."
+                }
+            }
+            ws.send(json.dumps(event))
 
+        # Receiving messages will require parsing message payloads
+        # from JSON
         def on_message(ws, message):
             data = json.loads(message)
             print("Received event:", json.dumps(data, indent=2))
