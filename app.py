@@ -8,24 +8,22 @@ import json
 import websocket
 
 
+# Configure Flask app
 app = Flask(__name__)
 app.secret_key = os.getenv('SECRET_KEY', 'your_secret_key')
-# Ensure the DATABASE_URL is correctly formatted for PostgreSQL
-DATABASE_URL = os.getenv('DATABASE_URL', 'sqlite:///app.db')
 
-# Fixing the PostgreSQL URL for SQLAlchemy
-if DATABASE_URL.startswith("postgres://"):
-    DATABASE_URL = DATABASE_URL.replace("postgres://", "postgresql://", 1)
-
-app.config['SQLALCHEMY_DATABASE_URI'] = DATABASE_URL
+# Configure PostgreSQL database
+app.config['SQLALCHEMY_DATABASE_URI'] = os.getenv('DATABASE_URL').replace("postgres://", "postgresql://")
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
-app.config['SESSION_COOKIE_NAME'] = 'cookie'
 
+# Initialize database
 db = SQLAlchemy(app)
 
+# Configure Flask-Login
 login_manager = LoginManager()
 login_manager.init_app(app)
 
+# Configure OAuth for Google SSO
 oauth = OAuth(app)
 google = oauth.remote_app(
     'google',
@@ -39,16 +37,13 @@ google = oauth.remote_app(
     authorize_url='https://accounts.google.com/o/oauth2/auth',
 )
 
-class User(UserMixin, db.Model):
-    id = db.Column(db.String(100), primary_key=True)
-    name = db.Column(db.String(100))
-    email = db.Column(db.String(100), unique=True)
-
-class Interaction(db.Model):
-    id = db.Column(db.Integer, primary_key=True)
-    user_id = db.Column(db.String(100), db.ForeignKey('user.id'))
-    user_input = db.Column(db.Text)
-    response = db.Column(db.Text)
+# User model
+class User(db.Model, UserMixin):
+    __tablename__ = "users"
+    user_id = db.Column(db.String(255), primary_key=True)
+    email = db.Column(db.String(255), unique=True, nullable=False)
+    name = db.Column(db.String(255))
+    created_at = db.Column(db.TIMESTAMP, default=db.func.now())
 
 @login_manager.user_loader
 def load_user(user_id):
@@ -66,31 +61,24 @@ def login():
 def authorized():
     response = google.authorized_response()
     if response is None or response.get('access_token') is None:
-        return 'Access denied'
+        return "Access denied."
 
     session['google_token'] = (response['access_token'], '')
-    user_info = google.get('userinfo').data
-    user = User.query.get(user_info['id'])
+    user_info = google.get('userinfo')
+    user_data = user_info.data
 
+    user_id = user_data.get('id')
+    email = user_data.get('email')
+    name = user_data.get('name')
+
+    user = User.query.filter_by(user_id=user_id).first()
     if not user:
-        user = User(id=user_info['id'], name=user_info['name'], email=user_info['email'])
+        user = User(user_id=user_id, email=email, name=name)
         db.session.add(user)
         db.session.commit()
 
     login_user(user)
     return redirect(url_for('index'))
-
-import logging
-from datetime import datetime
-logger = logging.getLogger(__name__)
-
-def create_user(user_data):
-    # Code to create user
-    logger.info(f"New user created: {user_data['username']}")
-
-def log_user_stats():
-    total_users = get_total_user_count()  # Implement this function
-    logger.info(f"{datetime.now()}: Total users: {total_users}")
 
 @google.tokengetter
 def get_google_oauth_token():
@@ -101,6 +89,67 @@ def get_google_oauth_token():
 def logout():
     logout_user()
     return redirect(url_for('index'))
+
+@app.route('/query', methods=['POST'])
+@login_required
+def query():
+    data = request.json
+    user_input = data.get('input')
+    selected_service = data.get('service')
+    selected_model = data.get('model')
+
+    if not user_input or not selected_service or not selected_model:
+        return jsonify({'error': 'Missing input or selection'}), 400
+
+    try:
+        if selected_service == 'deepseek':
+            client = OpenAI(api_key=os.getenv("DEEPSEEK_API_KEY"))
+            response = client.chat.completions.create(
+                model=selected_model,
+                messages=[
+                    {"role": "system", "content": "You are a helpful assistant"},
+                    {"role": "user", "content": user_input},
+                ],
+                stream=False
+            )
+        elif selected_service == 'openai':
+            client = OpenAI(api_key=os.getenv("OPENAI_API_KEY"))
+            response = client.chat.completions.create(
+                model=selected_model,
+                messages=[
+                    {"role": "system", "content": "You are a helpful assistant"},
+                    {"role": "user", "content": user_input},
+                ],
+                stream=False
+            )
+        else:
+            return jsonify({'error': 'Invalid service selected'}), 400
+
+        response_data = response.choices[0].message.content
+        return jsonify(response_data)
+
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
+
+if __name__ == '__main__':
+    app.run(debug=True)
+
+
+import logging
+from datetime import datetime
+logger = logging.getLogger(__name__)
+
+def create_user(user_data):
+    # Code to create user
+    logger.info(f"New user created: {user_data['username']}")
+
+# def log_user_stats():
+#     total_users = get_total_user_count()  # Implement this function
+#     logger.info(f"{datetime.now()}: Total users: {total_users}")
+
+@google.tokengetter
+def get_google_oauth_token():
+    return session.get('google_token')
 
 def store_interaction(user_id, user_input, response_data):
     interaction = Interaction(user_id=user_id, user_input=user_input, response=response_data)
@@ -133,35 +182,38 @@ def query():
             "OpenAI-Beta: realtime=v1"
         ]
         message=[{"role": "system", "content": "You are a helpful assistant"},{"role": "user", "content": user_input}]
+        print("message : " + str(message))
+        print("headers : " + str(headers))
+        print("url : " + str(url))
 
-        # To send a client event, serialize a dictionary to JSON
-        # of the proper event type
-        def on_open(ws):
-            print("Connected to server.")
+        # # To send a client event, serialize a dictionary to JSON
+        # # of the proper event type
+        # def on_open(ws):
+        #     print("Connected to server.")
             
-            event = {
-                "type": "response.create",
-                "response": {
-                    "modalities": ["text"],
-                    "instructions": "Please assist the user."
-                }
-            }
-            ws.send(json.dumps(event))
+        #     event = {
+        #         "type": "response.create",
+        #         "response": {
+        #             "modalities": ["text"],
+        #             "instructions": "Please assist the user."
+        #         }
+        #     }
+        #     ws.send(json.dumps(event))
 
-        # Receiving messages will require parsing message payloads
-        # from JSON
-        def on_message(ws, message):
-            data = json.loads(message)
-            print("Received event:", json.dumps(data, indent=2))
+        # # Receiving messages will require parsing message payloads
+        # # from JSON
+        # def on_message(ws, message):
+        #     data = json.loads(message)
+        #     print("Received event:", json.dumps(data, indent=2))
 
-        ws = websocket.WebSocketApp(
-            url,
-            header=headers,
-            on_open=on_open,
-            on_message=on_message,
-        )
+        # ws = websocket.WebSocketApp(
+        #     url,
+        #     header=headers,
+        #     on_open=on_open,
+        #     on_message=on_message,
+        # )
 
-        ws.run_forever()
+        # ws.run_forever()
 
         response = oaiclient.chat.completions.create(
             model=model,
