@@ -19,9 +19,10 @@ def query():
 
     # Proxy the request to DeepSeek API
     try:
-        client = OpenAI(api_key=os.getenv("OPENAI_API_KEY"))
+        oaiclient = OpenAI()
+        oaiclient.api_key = os.getenv("OPENAI_API_KEY")
         # client = OpenAI(api_key=os.getenv("DEEPSEEK_API_KEY"), base_url=DEEPSEEK_API_URL)
-        response = client.chat.completions.create(
+        response = oaiclient.chat.completions.create(
             # model="deepseek-chat",
             model="gpt-4o",
             messages=[
