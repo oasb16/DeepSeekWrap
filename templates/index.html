@@ -64,14 +64,12 @@
         serviceSelect.addEventListener('change', (event) => {
             const selectedService = event.target.value;
             modelSelect.innerHTML = '';
-            console.log("Before models")
             models[selectedService].forEach(model => {
                 const option = document.createElement('option');
                 option.value = model;
                 option.textContent = model;
                 modelSelect.appendChild(option);
             });
-            console.log("After models")
         });
 
         // Trigger change event to populate models on page load
@@ -96,10 +94,7 @@
                 });
 
                 const data = await response.json();
-                responseText.textContent = data.response;
-                console.log(data)
-                console.log(data.response) // Adjust based on your response structure
-                console.log(data.history)
+                responseText.textContent = data.response; // Adjust based on your response structure
                 responseSection.classList.remove('hidden');
                 updateChatHistory(data.response);
             } catch (error) {
@@ -108,22 +103,17 @@
             }
         });
 
-        function updateChatHistory(history) {
+        function updateChatHistory(data_response) {
             const historyContent = document.getElementById('history-content');
             historyContent.innerHTML = '';
-            console.log("Before history")
-            console.log(history)
-            history.forEach(entry => {
-                const userDiv = document.createElement('div');
-                userDiv.classList.add('chat-entry', 'user-entry');
-                userDiv.textContent = entry.user_input;
-                const responseDiv = document.createElement('div');
-                responseDiv.classList.add('chat-entry', 'response-entry');
-                responseDiv.textContent = entry.response_data;
-                historyContent.appendChild(userDiv);
-                historyContent.appendChild(responseDiv);
-            });
-            console.log("After history")
+            const userDiv = document.createElement('div');
+            userDiv.classList.add('chat-entry', 'user-entry');
+            userDiv.textContent = data_response;
+            const responseDiv = document.createElement('div');
+            responseDiv.classList.add('chat-entry', 'response-entry');
+            responseDiv.textContent = data_response;
+            historyContent.appendChild(userDiv);
+            historyContent.appendChild(responseDiv);
             document.getElementById('chat-history').classList.remove('hidden');
         }
     </script>
