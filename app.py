@@ -1,9 +1,11 @@
 from flask import Flask, render_template, request, jsonify
-import requests
+import os
+from openai import OpenAI
 
 app = Flask(__name__)
 
-DEEPSEEK_API_URL = 'https://api.deepseek.com/your-endpoint'  # Replace with the actual DeepSeek API endpoint
+DEEPSEEK_API_URL = 'https://api.deepseek.com'  # Replace with the actual DeepSeek API endpoint
+OPENAI_URL = 'https://api.deepseek.com'  # Replace with the actual DeepSeek API endpoint
 
 @app.route('/')
 def index():
@@ -17,8 +19,19 @@ def query():
 
     # Proxy the request to DeepSeek API
     try:
-        response = requests.post(DEEPSEEK_API_URL, json={'query': user_input})
-        response_data = response.json()
+        client = OpenAI(api_key=os.getenv("OPENAI_API_KEY"))
+        # client = OpenAI(api_key=os.getenv("DEEPSEEK_API_KEY"), base_url=DEEPSEEK_API_URL)
+        response = client.chat.completions.create(
+            # model="deepseek-chat",
+            model="gpt-4o",
+            messages=[
+                {"role": "system", "content": "You are a helpful assistant"},
+                {"role": "user", "content": "Hello"},
+            ],
+            stream=False
+        )
+        response_data=response.choices[0].message.content
+        print(response_data)
         return jsonify(response_data)
     except Exception as e:
         return jsonify({'error': str(e)}), 500
