@@ -46,11 +46,7 @@
                 });
 
                 const data = await response.json();
-                if (data.error) {
-                    responseText.textContent = `Error: ${data.error}`;
-                } else {
-                    responseText.textContent = data; // Adjust based on DeepSeek's response structure
-                }
+                responseText.textContent = data; // Adjust based on DeepSeek's response structure
                 responseSection.classList.remove('hidden');
             } catch (error) {
                 responseText.textContent = `Error: ${error.message}`;
