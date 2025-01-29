@@ -109,6 +109,7 @@
             const historyContent = document.getElementById('history-content');
             historyContent.innerHTML = '';
             console.log("Before history")
+            console.log(history)
             history.forEach(entry => {
                 const userDiv = document.createElement('div');
                 userDiv.classList.add('chat-entry', 'user-entry');
