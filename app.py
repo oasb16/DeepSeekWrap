@@ -7,11 +7,19 @@ from openai import OpenAI
 
 app = Flask(__name__)
 app.secret_key = os.getenv('SECRET_KEY', 'your_secret_key')
-app.config['SQLALCHEMY_DATABASE_URI'] = os.getenv('DATABASE_URL').replace('postgres://', 'postgresql://')
+# Ensure the DATABASE_URL is correctly formatted for PostgreSQL
+DATABASE_URL = os.getenv('DATABASE_URL', 'sqlite:///app.db')
+
+# Fixing the PostgreSQL URL for SQLAlchemy
+if DATABASE_URL.startswith("postgres://"):
+    DATABASE_URL = DATABASE_URL.replace("postgres://", "postgresql://", 1)
+
+app.config['SQLALCHEMY_DATABASE_URI'] = DATABASE_URL
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
-app.config['SESSION_COOKIE_NAME'] = 'your_session_cookie_name'
+app.config['SESSION_COOKIE_NAME'] = 'cookie'
 
 db = SQLAlchemy(app)
+
 login_manager = LoginManager()
 login_manager.init_app(app)
 
