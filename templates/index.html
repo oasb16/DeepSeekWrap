@@ -14,6 +14,19 @@
             <p>Engage with AI-powered insights.</p>
         </header>
         <main>
+            <div class="model-selection">
+                <label for="service">Choose a service:</label>
+                <select id="service" name="service">
+                    <option value="deepseek">DeepSeek</option>
+                    <option value="openai">OpenAI</option>
+                </select>
+            
+                <label for="model">Choose a model:</label>
+                <select id="model" name="model">
+                    <!-- Options will be populated based on service selection -->
+                </select>
+            </div>
+            
             <div class="input-section">
                 <textarea id="user-input" placeholder="Type your query here..."></textarea>
                 <button id="submit-btn">Submit</button>
@@ -29,6 +42,28 @@
     </div>
 
     <script>
+        const serviceSelect = document.getElementById('service');
+        const modelSelect = document.getElementById('model');
+
+        const models = {
+            deepseek: ['model_ds1', 'model_ds2'],
+            openai: ['gpt-3.5-turbo', 'gpt-4']
+        };
+
+        serviceSelect.addEventListener('change', (event) => {
+            const selectedService = event.target.value;
+            modelSelect.innerHTML = '';
+            models[selectedService].forEach(model => {
+                const option = document.createElement('option');
+                option.value = model;
+                option.textContent = model;
+                modelSelect.appendChild(option);
+            });
+        });
+
+        // Trigger change event to populate models on page load
+        serviceSelect.dispatchEvent(new Event('change'));
+
         document.getElementById('submit-btn').addEventListener('click', async () => {
             const userInput = document.getElementById('user-input').value.trim();
             if (!userInput) return;
