@@ -123,10 +123,7 @@ def query():
             model=model,
             messages=[{"role": "system", "content": "You are a helpful assistant"},
                       {"role": "user", "content": user_input}],
-            stream=False,
-            max_tokens=60,
-            temperature=0.5,
-            use_document=True
+            stream=False
         )
 
         response_data = response.choices[0].message.content
