@@ -5,12 +5,13 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>DeepSeek Proxy Gateway</title>
     <link rel="stylesheet" href="{{ url_for('static', filename='css/styles.css') }}">
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500&display=swap" rel="stylesheet">
 </head>
 <body>
     <div class="container">
         <header>
-            <h1>Welcome to DeepSeek Experience</h1>
-            <p>Engage with our AI-powered insights.</p>
+            <h1>DeepSeek Experience</h1>
+            <p>Engage with AI-powered insights.</p>
         </header>
         <main>
             <div class="input-section">
@@ -29,7 +30,7 @@
 
     <script>
         document.getElementById('submit-btn').addEventListener('click', async () => {
-            const userInput = document.getElementById('user-input').value;
+            const userInput = document.getElementById('user-input').value.trim();
             if (!userInput) return;
 
             const responseSection = document.getElementById('response-section');
@@ -45,8 +46,11 @@
                 });
 
                 const data = await response.json();
-                console.log(data)
-                responseText.textContent = data;  // Adjust based on DeepSeek's response structure
+                if (data.error) {
+                    responseText.textContent = `Error: ${data.error}`;
+                } else {
+                    responseText.textContent = data; // Adjust based on DeepSeek's response structure
+                }
                 responseSection.classList.remove('hidden');
             } catch (error) {
                 responseText.textContent = `Error: ${error.message}`;
