@@ -77,6 +77,18 @@ def authorized():
     login_user(user)
     return redirect(url_for('index'))
 
+import logging
+from datetime import datetime
+logger = logging.getLogger(__name__)
+
+def create_user(user_data):
+    # Code to create user
+    logger.info(f"New user created: {user_data['username']}")
+
+def log_user_stats():
+    total_users = get_total_user_count()  # Implement this function
+    logger.info(f"{datetime.now()}: Total users: {total_users}")
+
 @google.tokengetter
 def get_google_oauth_token():
     return session.get('google_token')
@@ -111,7 +123,10 @@ def query():
             model=model,
             messages=[{"role": "system", "content": "You are a helpful assistant"},
                       {"role": "user", "content": user_input}],
-            stream=False
+            stream=False,
+            max_tokens=60,
+            temperature=0.5,
+            use_document=True
         )
 
         response_data = response.choices[0].message.content
