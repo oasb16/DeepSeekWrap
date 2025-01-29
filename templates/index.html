@@ -45,6 +45,10 @@
                 });
 
                 const data = await response.json();
+                print(str(data.error))
+                print(str(data.result))
+                print(str(data.response))
+                print(str(data.JSON))
                 if (data.error) {
                     responseText.textContent = `Error: ${data.error}`;
                 } else {
