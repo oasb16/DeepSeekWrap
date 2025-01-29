@@ -64,12 +64,14 @@
         serviceSelect.addEventListener('change', (event) => {
             const selectedService = event.target.value;
             modelSelect.innerHTML = '';
+            console.log("Before models")
             models[selectedService].forEach(model => {
                 const option = document.createElement('option');
                 option.value = model;
                 option.textContent = model;
                 modelSelect.appendChild(option);
             });
+            console.log("After models")
         });
 
         // Trigger change event to populate models on page load
@@ -106,6 +108,7 @@
         function updateChatHistory(history) {
             const historyContent = document.getElementById('history-content');
             historyContent.innerHTML = '';
+            console.log("Before history")
             history.forEach(entry => {
                 const userDiv = document.createElement('div');
                 userDiv.classList.add('chat-entry', 'user-entry');
@@ -116,6 +119,7 @@
                 historyContent.appendChild(userDiv);
                 historyContent.appendChild(responseDiv);
             });
+            console.log("After history")
             document.getElementById('chat-history').classList.remove('hidden');
         }
     </script>
