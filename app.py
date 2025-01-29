@@ -27,7 +27,7 @@ def query():
             model="gpt-4o",
             messages=[
                 {"role": "system", "content": "You are a helpful assistant"},
-                {"role": "user", "content": "Hello"},
+                {"role": "user", "content": user_input},
             ],
             stream=False
         )
