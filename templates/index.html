@@ -18,35 +18,37 @@
                 <a href="{{ url_for('login') }}" class="google-btn">Login with Google</a>
             {% endif %}
         </header>
+        
         {% if current_user.is_authenticated %}
         <main>
             <div class="model-selection">
                 <label for="service">Choose a service:</label>
-                <select id="service" name="service">
+                <select id="service">
                     <option value="deepseek">DeepSeek</option>
                     <option value="openai">OpenAI</option>
                 </select>
-            
+
                 <label for="model">Choose a model:</label>
-                <select id="model" name="model">
-                    <!-- Options will be populated based on service selection -->
-                </select>
+                <select id="model"></select>
             </div>
-            
+
             <div class="input-section">
                 <textarea id="user-input" placeholder="Type your query here..."></textarea>
                 <button id="submit-btn">Submit</button>
             </div>
+
             <div id="response-section" class="hidden">
                 <h2>Response:</h2>
                 <p id="response-text"></p>
             </div>
+
             <div id="chat-history" class="hidden">
                 <h2>Chat History:</h2>
                 <div id="history-content"></div>
             </div>
         </main>
         {% endif %}
+
         <footer>
             <p>&copy; 2025 DeepSeek Proxy Gateway</p>
         </footer>
@@ -55,67 +57,34 @@
     <script>
         const serviceSelect = document.getElementById('service');
         const modelSelect = document.getElementById('model');
-
         const models = {
             deepseek: ['model_ds1', 'model_ds2'],
             openai: ['gpt-3.5-turbo', 'gpt-4']
         };
 
-        serviceSelect.addEventListener('change', (event) => {
-            const selectedService = event.target.value;
+        serviceSelect.addEventListener('change', () => {
             modelSelect.innerHTML = '';
-            models[selectedService].forEach(model => {
+            models[serviceSelect.value].forEach(model => {
                 const option = document.createElement('option');
                 option.value = model;
                 option.textContent = model;
                 modelSelect.appendChild(option);
             });
         });
-
-        // Trigger change event to populate models on page load
         serviceSelect.dispatchEvent(new Event('change'));
 
         document.getElementById('submit-btn').addEventListener('click', async () => {
             const userInput = document.getElementById('user-input').value.trim();
-            const selectedService = serviceSelect.value;
-            const selectedModel = modelSelect.value;
             if (!userInput) return;
-
-            const responseSection = document.getElementById('response-section');
-            const responseText = document.getElementById('response-text');
-
-            try {
-                const response = await fetch('/query', {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                    },
-                    body: JSON.stringify({ input: userInput, service: selectedService, model: selectedModel }),
-                });
-
-                const data = await response.json();
-                responseText.textContent = data.response; // Adjust based on your response structure
-                responseSection.classList.remove('hidden');
-                updateChatHistory(data.response);
-            } catch (error) {
-                responseText.textContent = `Error: ${error.message}`;
-                responseSection.classList.remove('hidden');
-            }
+            const response = await fetch('/query', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ input: userInput, service: serviceSelect.value, model: modelSelect.value })
+            });
+            const data = await response.json();
+            document.getElementById('response-text').textContent = data.response;
+            document.getElementById('response-section').classList.remove('hidden');
         });
-
-        function updateChatHistory(data_response) {
-            const historyContent = document.getElementById('history-content');
-            historyContent.innerHTML = '';
-            const userDiv = document.createElement('div');
-            userDiv.classList.add('chat-entry', 'user-entry');
-            userDiv.textContent = data_response;
-            const responseDiv = document.createElement('div');
-            responseDiv.classList.add('chat-entry', 'response-entry');
-            responseDiv.textContent = data_response;
-            historyContent.appendChild(userDiv);
-            historyContent.appendChild(responseDiv);
-            document.getElementById('chat-history').classList.remove('hidden');
-        }
     </script>
 </body>
 </html>
