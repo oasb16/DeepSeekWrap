@@ -101,7 +101,7 @@
                 console.log(data.response) // Adjust based on your response structure
                 console.log(data.history)
                 responseSection.classList.remove('hidden');
-                updateChatHistory(data.history);
+                updateChatHistory(data.response);
             } catch (error) {
                 responseText.textContent = `Error: ${error.message}`;
                 responseSection.classList.remove('hidden');
