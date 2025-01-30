@@ -56,7 +56,7 @@ class Interaction(db.Model):
     user_id = db.Column(db.String(100), db.ForeignKey('user.id'))
     user_input = db.Column(db.Text)
     response = db.Column(db.Text)
-    created_at = db.Column(db.TIMESTAMP, default=datetime.utcnow)
+    created_at = db.Column(db.DateTime, default=db.func.current_timestamp())  # Add this line
 
 @login_manager.user_loader
 def load_user(user_id):
